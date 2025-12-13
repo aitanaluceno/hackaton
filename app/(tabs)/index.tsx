@@ -6,21 +6,19 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
-// Component auxiliar per aplicar estils de negreta dins del text
 const BoldText = ({ children }) => <Text style={styles.boldText}>{children}</Text>;
 
 export default function HomeScreen() {
   return (
-    // Aplicamos un gris muy oscuro al ParallaxScrollView para el fondo
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#444', dark: '#444' }} // Fondo del header muy oscuro
+      headerBackgroundColor={{ light: '#444', dark: '#444' }} 
       headerImage={
         <Image
           source={require('@/assets/images/logos.png')}
           style={styles.headerImage} 
         />
       }
-      style={styles.mainContainer} // Aplicamos el color de fondo principal #1e1e1e
+      style={styles.mainContainer} 
     >
       {/* Benvinguda*/}
       <ThemedView style={styles.titleContainer}>
