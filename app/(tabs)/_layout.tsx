@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+const TAB_BAR_BACKGROUND_COLOR = '#25292e'; 
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,9 +13,19 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: TAB_BAR_BACKGROUND_COLOR, // <--- CAMBIO AQUÍ
+          borderTopColor: TAB_BAR_BACKGROUND_COLOR, // Usa el mismo color para ocultar la línea de borde
+        },
+        // Los colores de icono/texto se mantienen según tu configuración en theme.ts (tabIconSelected y tabIconDefault)
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tabIconSelected, 
+        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault, 
+        
+        // Ajustamos el color del encabezado de cada pantalla para que coincida
+        headerStyle: {
+          backgroundColor: TAB_BAR_BACKGROUND_COLOR, // <--- CAMBIO AQUÍ
+        },
+        headerTintColor: Colors[colorScheme ?? 'light'].text, // Título del encabezado (blanco)
       }}>
       <Tabs.Screen
         name="index"
