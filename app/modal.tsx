@@ -22,7 +22,7 @@ export default function ModalScreen() {
         A continuació haurás de realitzar quatre activitats per evaular cadascuna de les àrees esmentades. Comencem!
       </ThemedText>
 
-      
+    
 
       {/* botó */}
       <Button 
