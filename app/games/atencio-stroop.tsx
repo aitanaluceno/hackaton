@@ -1,134 +1,337 @@
-import { useLocalSearchParams } from 'expo-router'; // <-- Hook per llegir paràmetres de la ruta
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
 
-// Importa les funcions de la base de dades
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from '../../config/firebaseConfig';
+// Configuració de colors i textos
+const COLORS = [
+  { label: 'VERMELL', hex: '#ff4444' },
+  { label: 'BLAU', hex: '#2196f3' },
+  { label: 'VERD', hex: '#4caf50' },
+  { label: 'GROC', hex: '#ffd33d' },
+  { label: 'LILA', hex: '#9c27b0' },
+  { label: 'TARONJA', hex: '#ff9800' }
+];
 
-const currentUserId = 'USER_ID_PROVA_123'; // <-- RECORDA CANVIAR AIXÒ
+export default function StroopGameScreen() {
+  const router = useRouter();
 
-// ==========================================================
-// FUNCIÓ 1: ESCRIPTURA DE DADES (Guardar el resultat)
-// ==========================================================
+  // Estats
+  const [gameState, setGameState] = useState<'intro' | 'playing' | 'finished'>('intro');
+  const [timeLeft, setTimeLeft] = useState(45); // 45 segons per aquest joc
+  const [score, setScore] = useState(0);
+  
+  // Estat de la ronda actual
+  const [currentWord, setCurrentWord] = useState(COLORS[0]); 
+  const [currentColor, setCurrentColor] = useState(COLORS[1]); 
+  const [questionType, setQuestionType] = useState<'text' | 'color'>('text'); 
+  const [options, setOptions] = useState<string[]>([]); 
 
-const saveGameResult = async (resultData: { score: number, avgResponseTime: number, gameId: string, difficulty: string }) => {
-  try {
-    const docRef = await addDoc(collection(db, 'game_results'), {
-      userId: currentUserId,
-      ...resultData,
-      date: new Date().toISOString(), 
-    });
-    console.log("Resultat Stroop guardat amb ID: ", docRef.id);
-  } catch (e) {
-    console.error("Error guardant el resultat de Stroop: ", e);
-    // Pots afegir un alert aquí per avisar l'usuari
-  }
-};
-
-// ==========================================================
-// COMPONENT PRINCIPAL
-// ==========================================================
-
-export default function AtencioStroopScreen() {
-    // 1. LECTURA DEL PARÀMETRE DE DIFICULTAT PASSAT PER jocs.tsx
-    const params = useLocalSearchParams();
-    // params.difficulty serà 'Easy', 'Medium' o 'Hard', segons la personalització
-    const difficulty = params.difficulty as string || 'Medium'; 
-    const gameId = params.gameId as string || 'atencioStroop';
-
-    const [gameStatus, setGameStatus] = useState<'running' | 'finished' | 'idle'>('idle');
-    const [finalScore, setFinalScore] = useState(0);
-    const [averageReactionTime, setAverageReactionTime] = useState(0);
-    
-    // Configura el joc segons la dificultat
-    const gameSettings = {
-        Hard: { timeLimit: 30, minResponseTime: 500 }, // Més curt, més ràpid
-        Medium: { timeLimit: 45, minResponseTime: 700 },
-        Easy: { timeLimit: 60, minResponseTime: 900 }, // Més llarg, menys pressió
-    };
-    
-    const settings = gameSettings[difficulty as keyof typeof gameSettings] || gameSettings.Medium;
-
-    // Aquesta funció simula el final del joc i crida a la funció de guardar
-    const handleGameEnd = (score: number, totalTime: number) => {
-        setGameStatus('finished');
-        
-        // Càlcul de la mètrica clau
-        const avgTime = totalTime / score; // Això és una simplificació! 
-        setFinalScore(score);
-        setAverageReactionTime(avgTime);
-
-        // 2. CRIDA A L'ESCRIPTURA DE DADES
-        saveGameResult({
-            score: score,
-            avgResponseTime: avgTime,
-            gameId: gameId,
-            difficulty: difficulty,
-        });
-    };
-
-    // --- CODI DE LA LÒGICA DEL JOC (Aquí aniria el teu codi real de Stroop) ---
-
-    useEffect(() => {
-        if (gameStatus === 'running') {
-            console.log(`Joc iniciat amb dificultat: ${difficulty}. Límits de temps: ${settings.timeLimit}s.`);
-            // Aquí començaria el temporitzador i la lògica del joc
-            
-            // SIMULACIÓ: El joc acaba als 5 segons amb una puntuació de 15 i un temps total de 12.3s
-            const simulationTimer = setTimeout(() => {
-                const simulatedScore = 15;
-                const simulatedTotalResponseTime = 12.3;
-                handleGameEnd(simulatedScore, simulatedTotalResponseTime);
-            }, 5000); 
-
-            return () => clearTimeout(simulationTimer);
-        }
-    }, [gameStatus, difficulty]);
-
-
-    // --- RENDERITZAT ---
-    
-    if (gameStatus === 'idle') {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.title}>Joc: {gameId}</Text>
-                <Text style={styles.text}>Dificultat assignada: {difficulty}</Text>
-                <Text style={styles.text}>El teu repte: {settings.timeLimit} segons de joc.</Text>
-                <Button title="Començar Joc" onPress={() => setGameStatus('running')} />
-            </View>
-        );
+  // Temporitzador
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (gameState === 'playing' && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && gameState === 'playing') {
+      finishGame();
     }
+    return () => clearInterval(interval);
+  }, [gameState, timeLeft]);
 
-    if (gameStatus === 'running') {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.title}>Joc en Curs... (Stroop)</Text>
-                {/* Aquí aniria la interfície del teu joc */}
-            </View>
-        );
-    }
+  // Generar nova ronda
+  const generateRound = () => {
+    const randomWordIdx = Math.floor(Math.random() * COLORS.length);
+    const randomColorIdx = Math.floor(Math.random() * COLORS.length);
     
+    const type = Math.random() > 0.5 ? 'text' : 'color';
+
+    const wordObj = COLORS[randomWordIdx];
+    const colorObj = COLORS[randomColorIdx];
+
+    const correctAnswer = type === 'text' ? wordObj.label : colorObj.label;
+
+    let wrongAnswerIdx = Math.floor(Math.random() * COLORS.length);
+    while (COLORS[wrongAnswerIdx].label === correctAnswer) {
+      wrongAnswerIdx = Math.floor(Math.random() * COLORS.length);
+    }
+    const wrongAnswer = COLORS[wrongAnswerIdx].label;
+
+    const newOptions = Math.random() > 0.5 
+      ? [correctAnswer, wrongAnswer] 
+      : [wrongAnswer, correctAnswer];
+
+    setCurrentWord(wordObj);
+    setCurrentColor(colorObj);
+    setQuestionType(type);
+    setOptions(newOptions);
+  };
+
+  const startGame = () => {
+    setScore(0);
+    setTimeLeft(45);
+    setGameState('playing');
+    generateRound();
+  };
+
+  const handleAnswer = (selectedOption: string) => {
+    const correctAnswer = questionType === 'text' ? currentWord.label : currentColor.label;
+
+    if (selectedOption === correctAnswer) {
+      setScore(prev => prev + 1);
+      Vibration.vibrate(15); 
+    } else {
+      Vibration.vibrate(100); 
+    }
+    generateRound();
+  };
+
+  const finishGame = () => {
+    setGameState('finished');
+    Vibration.vibrate([0, 500]);
+  };
+
+  if (gameState === 'intro') {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Joc Finalitzat!</Text>
-            <Text style={styles.text}>Puntuació: {finalScore}</Text>
-            <Text style={styles.text}>Temps de reacció mitjà: {averageReactionTime.toFixed(2)}s</Text>
-            <Text style={styles.success}>Dades guardades correctament a Firestore.</Text>
-            <Button title="Tornar a Jocs" onPress={() => { /* Navegació */ }} />
-        </View>
+      <View style={styles.container}>
+        <Stack.Screen options={{ title: 'Atenció: Stroop', headerTintColor: '#ffd33d', headerStyle: { backgroundColor: '#1e1e1e' } }} />
+        
+        <IconSymbol name="eye.fill" size={80} color="#2196f3" style={{marginBottom: 20}} />
+        
+        <Text style={styles.title}>Colors Mentiders</Text>
+        <Text style={styles.description}>
+          Apareixerà una paraula pintada d'un color.
+          {'\n\n'}
+          De vegades et preguntarem: {'\n'}
+          <Text style={{fontWeight:'bold', color: '#fff'}}> "Què hi posa?" (Llegeix)</Text>
+          {'\n'}o{'\n'}
+          <Text style={{fontWeight:'bold', color: '#fff'}}> "Quin color és?" (Mira)</Text>
+          {'\n\n'}
+          Respon ràpid abans que s'acabi el temps!
+        </Text>
+
+        <TouchableOpacity style={styles.primaryButton} onPress={startGame}>
+          <Text style={styles.buttonText}>COMENÇAR JOC</Text>
+        </TouchableOpacity>
+      </View>
     );
+  }
+
+  // 2. JUGANDO
+  if (gameState === 'playing') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.containerPlaying}>
+          
+          {/* Header Info */}
+          <View style={styles.headerBar}>
+            <View>
+              <Text style={styles.labelSmall}>Punts</Text>
+              <Text style={styles.scoreValue}>{score}</Text>
+            </View>
+            <View>
+              <Text style={styles.labelSmall}>Temps</Text>
+              <Text style={[styles.timerValue, timeLeft <= 10 && styles.textRed]}>{timeLeft}s</Text>
+            </View>
+          </View>
+
+          {/* PREGUNTA */}
+          <View style={styles.questionContainer}>
+            <Text style={styles.questionLabel}>
+              {questionType === 'text' ? "QUÈ HI POSA?" : "QUIN COLOR ÉS?"}
+            </Text>
+            {questionType === 'text' ? (
+                <IconSymbol name="text.quote" size={30} color="#ccc" />
+            ) : (
+                <IconSymbol name="paintpalette.fill" size={30} color="#ccc" />
+            )}
+          </View>
+
+          {/* PARAULA STROOP */}
+          <View style={styles.wordContainer}>
+            <Text style={[styles.stroopWord, { color: currentColor.hex }]}>
+              {currentWord.label}
+            </Text>
+          </View>
+
+          {/* BOTONS DE RESPOSTA */}
+          <View style={styles.optionsContainer}>
+            {options.map((opt, index) => (
+              <TouchableOpacity 
+                key={index} 
+                style={styles.optionButton} 
+                onPress={() => handleAnswer(opt)}
+              >
+                <Text style={styles.optionText}>{opt}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <Text style={styles.title}>TEMPS ESGOTAT!</Text>
+      
+      <View style={styles.resultBox}>
+        <Text style={styles.resultLabel}>Encerts totals:</Text>
+        <Text style={styles.resultNumber}>{score}</Text>
+      </View>
+
+      <Text style={styles.description}>
+        Exercici d'atenció selectiva completat.
+      </Text>
+
+      <TouchableOpacity style={styles.primaryButton} onPress={() => router.back()}>
+        <Text style={styles.buttonText}>FINALITZAR I SORTIR</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#222',
-        padding: 20,
-    },
-    title: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 20 },
-    text: { fontSize: 16, color: '#ccc', marginBottom: 10 },
-    success: { fontSize: 16, color: 'lightgreen', marginTop: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: '#1e1e1e',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#1e1e1e',
+  },
+  containerPlaying: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'space-between',
+    paddingBottom: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 16,
+    color: '#ccc',
+    textAlign: 'center',
+    marginBottom: 40,
+    lineHeight: 24,
+  },
+  primaryButton: {
+    backgroundColor: '#ffd33d',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 30,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  
+  // Header Joc
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    paddingBottom: 15,
+  },
+  labelSmall: {
+    color: '#888',
+    fontSize: 14,
+    textTransform: 'uppercase',
+  },
+  scoreValue: {
+    color: '#ffd33d',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  timerValue: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  textRed: {
+    color: '#ff4444',
+  },
+
+  // Zona Pregunta
+  questionContainer: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  questionLabel: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+
+  // Paraula Central
+  wordContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stroopWord: {
+    fontSize: 55, // Molt gran
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    // El color s'assigna dinàmicament
+  },
+
+  // Botons resposta
+  optionsContainer: {
+    flexDirection: 'row',
+    gap: 15,
+    height: 100,
+  },
+  optionButton: {
+    flex: 1,
+    backgroundColor: '#333',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#555',
+  },
+  optionText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  // Resultat
+  resultBox: {
+    backgroundColor: '#333',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 30,
+  },
+  resultLabel: {
+    color: '#aaa',
+    fontSize: 18,
+  },
+  resultNumber: {
+    color: '#2196f3', 
+    fontSize: 80,
+    fontWeight: 'bold',
+  },
 });
