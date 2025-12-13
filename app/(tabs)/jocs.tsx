@@ -1,21 +1,75 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ExternalLink } from '@/components/external-link';
+import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Collapsible } from '@/components/ui/collapsible';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Fonts } from '@/constants/theme';
+import { StyleSheet } from 'react-native';
 
-export default function AboutScreen() {
+import LockedScreen from '@/components/pantallabloqueig';
+import { useFormStatus } from '@/context/estatformularicontext';
+
+
+export default function TabTwoScreen() {
+  const { isFormCompleted } = useFormStatus();
+
+  if (!isFormCompleted) {
+    return <LockedScreen />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>NO screen</Text>
-    </View>
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerImage={ 
+        <IconSymbol
+          size={310}
+          color="#808080"
+          name="chevron.left.forwardslash.chevron.right"
+          style={styles.headerImage}
+        />
+      }>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText
+          type="title"
+          style={{
+            fontFamily: Fonts.rounded,
+          }}>
+          Explore
+        </ThemedText>
+      </ThemedView>
+      <ThemedText>This app includes example code to help you get started.</ThemedText>
+      {/* ... Resto del contenido original ... */}
+      
+      <Collapsible title="File-based routing">
+        <ThemedText>
+          This app has two screens:{' '}
+          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+        </ThemedText>
+        <ThemedText>
+          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
+          sets up the tab navigator.
+        </ThemedText>
+        <ExternalLink href="https://docs.expo.dev/router/introduction">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      {/* ... Y el resto de Collapsible ... */}
+
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#25292e',
-    justifyContent: 'space-between',
-    alignItems: 'rigth',
+  headerImage: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
+    position: 'absolute',
   },
-  text: {
-    color: '#fff',
+  titleContainer: {
+    flexDirection: 'row',
+    gap: 8,
   },
 });

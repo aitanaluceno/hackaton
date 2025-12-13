@@ -1,16 +1,32 @@
-import { Link } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { Button, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useFormStatus } from '@/context/estatformularicontext';
 
 export default function ModalScreen() {
+  const { completeForm } = useFormStatus(); 
+
+  const handleComplete = () => {
+    completeForm(); 
+    
+    router.back(); 
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">This is a modal</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">Go to home screen</ThemedText>
-      </Link>
+      <ThemedText type="title">Formulario de Configuración</ThemedText>
+      
+      <ThemedText style={styles.separator}>
+        ¡Al presionar el botón de abajo, se desbloquearán todas las secciones de la aplicación!
+      </ThemedText>
+
+      {/* 🔴 BOTÓN DE ACCIÓN */}
+      <Button 
+        title="Completar y Desbloquear" 
+        onPress={handleComplete} 
+      />
     </ThemedView>
   );
 }
@@ -22,8 +38,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
+  separator: {
+    marginVertical: 20,
+    maxWidth: '80%',
+    textAlign: 'center',
   },
 });

@@ -1,7 +1,8 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+// Archivo: app/(tabs)/index.tsx
 
-import { HelloWave } from '@/components/hello-wave';
+import { Image } from 'expo-image';
+import { Button, StyleSheet } from 'react-native';
+
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -17,63 +18,27 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
+      {/* 🔴 NUEVO CONTENIDO DE BIENVENIDA Y BOTÓN */}
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        <ThemedText type="title">Bienvenido/a</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
+        <ThemedText type="subtitle">Comienza Aquí</ThemedText>
         <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
+          {`Esta es la pantalla de inicio. Para desbloquear el resto de secciones 
+          (Estadísticas, Juegos y Preguntas Diarias), debes completar el formulario inicial.`}
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
+        <ThemedText type="subtitle">Accede al Formulario</ThemedText>
+        {/* 🔴 BOTÓN QUE LLEVA AL MODAL */}
+        <Link href="/modal" asChild>
+          <Button title="Ir al Formulario" />
         </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
+      
+      {/* Puedes eliminar el resto de ThemedView con "Step 1: Try it", "Step 2: Explore" y "Step 3: Get a fresh start" de tu código original, o dejarlos si los necesitas. Aquí solo incluí el nuevo contenido. */}
+      
     </ParallaxScrollView>
   );
 }
