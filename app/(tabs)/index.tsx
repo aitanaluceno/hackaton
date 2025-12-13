@@ -13,16 +13,16 @@ export default function HomeScreen() {
   return (
     // Aplicamos un gris muy oscuro al ParallaxScrollView para el fondo
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#1e1e1e', dark: '#1e1e1e' }} // Fondo del header muy oscuro
+      headerBackgroundColor={{ light: '#444', dark: '#444' }} // Fondo del header muy oscuro
       headerImage={
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
+          source={require('@/assets/images/logos.png')}
           style={styles.headerImage} 
         />
       }
       style={styles.mainContainer} // Aplicamos el color de fondo principal #1e1e1e
     >
-      {/* Benvinguda y formulari inicial*/}
+      {/* Benvinguda*/}
       <ThemedView style={styles.titleContainer}>
         <ThemedText style={styles.titleText}>Benvingut/da a ICOnnecta't</ThemedText>
       </ThemedView>
@@ -74,61 +74,57 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  // ESTILOS ADAPTADOS PARA FONDO OSCURO (#1e1e1e) Y TEXTO BLANCO (#fff)
   mainContainer: {
-    backgroundColor: '#1e1e1e', // Fondo gris muy oscuro / negro
+    backgroundColor: '#1e1e1e', 
     flex: 1,
     padding: 20,
     minHeight: 900,
   },
   headerImage: {
-    // Para que el color de fondo del header se vea en el Parallax
-    height: 178,
-    width: 290,
-    bottom: 0,
+    height: 125,
+    width: 920,
+    bottom: 60,
     left: 0,
     position: 'absolute',
-    opacity: 0.3, // Opacidad para el fondo oscuro
+    opacity: 1,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
     gap: 8,
-    backgroundColor: 'transparent', // Fondo de la ThemedView transparente
+    backgroundColor: 'transparent',
   },
   titleText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff', // Texto blanco
+    color: '#fff', 
   },
   stepContainer: {
     gap: 8,
     marginBottom: 20,
-    backgroundColor: 'transparent', // Fondo de la ThemedView transparente
+    backgroundColor: 'transparent', 
   },
   subTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff', // Texto blanco
+    color: '#fff', 
     marginBottom: 5,
     marginTop: 10,
   },
   sectionDescription: {
-    // Gris claro para el cuerpo del texto para más contraste sobre el fondo oscuro
     color: '#ccc', 
     fontSize: 15,
     lineHeight: 24,
     backgroundColor: 'transparent',
   },
-  // Estilo para las palabras en negrita dentro del texto
   boldText: {
     fontWeight: 'bold',
-    color: '#fff', // Texto blanco en negrita
+    color: '#fff', 
   },
   actionButton: {
     marginTop: 5,
-    backgroundColor: '#ffd33d', // Color del botón ICO
+    backgroundColor: '#ffd33d', 
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -136,7 +132,7 @@ const styles = StyleSheet.create({
     borderColor: '#ffd33d',
   },
   actionButtonText: {
-    color: '#000', // Texto negro en el botón amarillo
+    color: '#000', 
     fontWeight: 'bold',
     fontSize: 16,
   },

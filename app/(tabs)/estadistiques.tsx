@@ -1,53 +1,119 @@
-import LockedScreen from '@/components/pantallabloqueig';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useFormStatus } from '@/context/estatformularicontext';
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 
+import LockedScreen from '@/components/pantallabloqueig';
+import { useFormStatus } from '@/context/estatformularicontext';
+
 const screenWidth = Dimensions.get('window').width;
+const RECURSOS_URL = "https://impactovitalcancer.com/recursos-y-experiencias/recursos-pacientes/gestion-emocional-y-psicologica/";
 
+const LEGEND_CONFIG = {
+  legendFontColor: '#fff',
+  legendFontSize: 14,
+  legendFontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  legendFontWeight: 'normal', 
+};
 
+const RECOMANACIONS = {
+  'Atenció': {
+    title: "Focus i Mindfulness 🧘",
+    tips: [
+      "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
+      "Aquesta setmana és ideal per fer alguna manualitat (dibuix, puzle, cosir...). Posa molta atenció en allò que fas.",
+      "Si tens una estona, llegeix un text curt i intenta comprendre’l detenidament."
+    ]
+  },
+  'Memòria de Treball': { 
+    title: "Estratègies i Recordatoris 🧠",
+    tips: [
+      "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
+      "Aquesta setmana és ideal per tornar a fer aquella recepta que has deixat de fer i et sortia tan bé...",
+      "Prova d'aprendre algunes paraules d'un nou idioma!"
+    ]
+  },
+  'Velocitat Processament': {
+    title: "Agilitat Mental ⚡",
+    tips: [
+      "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
+      "Avui és el dia de les decisions ràpides: no pots tardar més de 15 segons en escollir la roba que et posaràs.",
+      "Dia d'anar al supermercat! Prova a trobar el més ràpid possible on són les galetes Maria."
+    ]
+  },
+  'Fluència Verbal': {
+    title: "Paraules i Llenguatge 🗣️",
+    tips: [
+      "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
+      "Avui durant 5 minuts has d'anar dient els objectes que veus al teu voltant.",
+      "Pensa durant uns minuts quantes fruites i verdures hi ha de color vermell."
+    ]
+  },
+  'Sense Dèficit': {
+    title: "Enhorabona! 🎉",
+    tips: [
+      "Les teves respostes indiquen que actualment no presentes problemes cognitius.",
+      "És important mantenir un estil de vida saludable:",
+      "• Fer esport i cuidar l'alimentació.",
+      "• Aprendre coses noves i sociabilitzar.",
+      "• Fer Mindfulness."
+    ]
+  }
+};
 
 export default function TabTwoScreen() {
-  // 1. Hooks de estado
+  const [filter, setFilter] = useState('1mes'); 
+  
+  // 3. Obté l'estat del formulari
   const { isFormCompleted } = useFormStatus();
-  const [filter, setFilter] = useState('setmana');
 
-  // 2. Lógica de Bloqueo: Si no ha rellenado el formulario, mostramos la pantalla de bloqueo
+  // Condicional de bloqueig
   if (!isFormCompleted) {
     return <LockedScreen />;
   }
 
-  // 3. Lógica de Estadísticas (Solo se ejecuta si el formulario está completo)
-  
-  // Configuració de la font
-  const fontConfig = {
-    legendFontColor: '#e0e0e0',
-    legendFontSize: 13,
-    legendFontFamily: 'System',
-    legendFontWeight: '600',
+  // 1. DADES ÚLTIM MES
+  // ... (la resta del teu codi continua igual)
+  const dadesUltimMes = [
+    { name: 'Fluència Verbal', population: 45, color: '#4caf50', ...LEGEND_CONFIG },
+    { name: 'Atenció', population: 20, color: '#2196f3', ...LEGEND_CONFIG },
+    { name: 'Memòria de Treball', population: 15, color: '#ff9800', ...LEGEND_CONFIG },
+    { name: 'Velocitat Processament', population: 20, color: '#9c27b0', ...LEGEND_CONFIG },
+  ];
+
+  // 2. DADES ÚLTIMS 3 MESOS
+  const dadesTrimestre = [
+    { name: 'Fluència Verbal', population: 20, color: '#4caf50', ...LEGEND_CONFIG },
+    { name: 'Atenció', population: 40, color: '#2196f3', ...LEGEND_CONFIG },
+    { name: 'Memòria de Treball', population: 20, color: '#ff9800', ...LEGEND_CONFIG },
+    { name: 'Velocitat Processament', population: 20, color: '#9c27b0', ...LEGEND_CONFIG },
+  ];
+
+  // 3. DADES SENSE DÈFICIT
+  const dadesHealthy = []; 
+
+  // SELECCIÓ DE DADES SEGONS FILTRE
+  let currentData = [];
+  if (filter === '1mes') currentData = dadesUltimMes;
+  else if (filter === '3mesos') currentData = dadesTrimestre;
+  else currentData = dadesHealthy;
+
+  // LÒGICA DE RECOMANACIÓ
+  const getRecommendationContent = (data) => {
+    if (!data || data.length === 0) return RECOMANACIONS['Sense Dèficit'];
+    const sortedData = [...data].sort((a, b) => b.population - a.population);
+    const topIssue = sortedData[0];
+    return RECOMANACIONS[topIssue.name] || RECOMANACIONS['Sense Dèficit'];
   };
 
-  // DADES SETMANA ACTUAL
-  const dadesSetmana = [
-    { name: 'Memòria de treball', population: 35, color: '#4caf50', ...fontConfig },      // Verd
-    { name: 'Velocitat processament', population: 25, color: '#ff9800', ...fontConfig },  // Taronja
-    { name: 'Atenció', population: 20, color: '#2196f3', ...fontConfig },                 // Blau
-    { name: 'Fluència alternant', population: 20, color: '#9c27b0', ...fontConfig },      // Lila
-  ];
+  const currentAdvice = getRecommendationContent(currentData);
+  const isHealthy = currentAdvice.title.includes("Enhorabona");
+  const boxStyle = isHealthy ? styles.adviceHealthy : styles.adviceAlert;
 
-  // DADES MES ANTERIOR
-  const dadesMes = [
-    { name: 'Memòria de treball', population: 25, color: '#4caf50', ...fontConfig },
-    { name: 'Velocitat processament', population: 25, color: '#ff9800', ...fontConfig },
-    { name: 'Atenció', population: 35, color: '#2196f3', ...fontConfig },
-    { name: 'Fluència alternant', population: 15, color: '#9c27b0', ...fontConfig },
-  ];
-
-  const currentData = filter === 'setmana' ? dadesSetmana : dadesMes;
-  const needsIntervention = filter === 'setmana'; 
+  const handleOpenLink = () => {
+    Linking.openURL(RECURSOS_URL).catch(err => console.error("Error obrint l'enllaç:", err));
+  };
 
   return (
     <ParallaxScrollView
@@ -61,85 +127,112 @@ export default function TabTwoScreen() {
         />
       }>
       
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>Evolució Cognitiva</Text>
-      </View>
+      <View style={styles.mainContainer}>
 
-      {/* FILTRES TEMPORALS */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity 
-          style={[styles.filterBtn, filter === 'setmana' && styles.filterBtnActive]}
-          onPress={() => setFilter('setmana')}
-        >
-          <Text style={[styles.filterText, filter === 'setmana' && styles.filterTextActive]}>Última Setmana</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.filterBtn, filter === 'mes' && styles.filterBtnActive]}
-          onPress={() => setFilter('mes')}
-        >
-          <Text style={[styles.filterText, filter === 'mes' && styles.filterTextActive]}>Últim Mes</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.sectionDescription}>
-        Distribució del rendiment per àrees clíniques.
-      </Text>
-
-      {/* GRÀFIC DE QUESITOS (PIE CHART) */}
-      <View style={styles.chartContainer}>
-        <PieChart
-          data={currentData}
-          width={screenWidth} 
-          height={240}
-          chartConfig={{
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            decimalPlaces: 0,
-          }}
-          accessor={"population"}
-          backgroundColor={"transparent"}
-          paddingLeft={"15"}
-          center={[10, 0]}
-          absolute
-          hasLegend={true}
-        />
-      </View>
-
-      {/* EL "DOCTOR VIRTUAL" */}
-      <View style={[styles.adviceBox, needsIntervention ? styles.adviceWarning : styles.adviceGood]}>
-        <Text style={styles.adviceTitle}>
-          {needsIntervention ? "⚠️ Detectem Estancament" : "✅ Progrés Adequat"}
-        </Text>
-        <Text style={styles.adviceText}>
-          {needsIntervention 
-            ? "Hem notat una baixada en l'Atenció i un estancament en la Velocitat processament. L'algoritme suggereix reduir la càrrega de 'Memòria de treball' i introduir exercicis de 'Fluència alternant' per recuperar agilitat."
-            : "Els teus resultats mostren una millora constant. Continuarem amb el pla establert."}
-        </Text>
-        {needsIntervention && (
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>🔄 Ajustar Pla Terapèutic</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* DETALL PER ÀREES */}
-      <Text style={styles.subTitle}>Detall per Àrees</Text>
-      {currentData.map((item, index) => (
-        <View key={index} style={styles.rowItem}>
-          <View style={styles.rowHeader}>
-            <Text style={styles.rowLabel}>{item.name}</Text>
-            <Text style={styles.rowValue}>{item.population}%</Text>
-          </View>
-          <View style={styles.progressBarBackground}>
-            <View style={[styles.progressBarFill, { width: `${item.population}%`, backgroundColor: item.color }]} />
-          </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleText}>Evolució Cognitiva</Text>
         </View>
-      ))}
 
+        {/* FILTRES TEMPORALS MODIFICATS */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity 
+            style={[styles.filterBtn, filter === '1mes' && styles.filterBtnActive]}
+            onPress={() => setFilter('1mes')}
+          >
+            <Text style={[styles.filterText, filter === '1mes' && styles.filterTextActive]}>Últim Mes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filterBtn, filter === '3mesos' && styles.filterBtnActive]}
+            onPress={() => setFilter('3mesos')}
+          >
+            <Text style={[styles.filterText, filter === '3mesos' && styles.filterTextActive]}>Últims 3 Mesos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filterBtn, filter === 'healthy' && styles.filterBtnActive]}
+            onPress={() => setFilter('healthy')}
+          >
+            <Text style={[styles.filterText, filter === 'healthy' && styles.filterTextActive]}>No Dèficit</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.sectionDescription}>
+          Distribució de les dificultats detectades. L'àrea més gran indica on hem d'incidir avui.
+        </Text>
+
+        {/* GRÀFIC */}
+        {currentData.length > 0 ? (
+          <View style={styles.chartContainer}>
+            <PieChart
+              data={currentData}
+              width={screenWidth - 20}
+              height={220}
+              chartConfig={{
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              }}
+              accessor={"population"}
+              backgroundColor={"transparent"}
+              paddingLeft={"15"}
+              absolute 
+            />
+          </View>
+        ) : (
+          <View style={[styles.chartContainer, { height: 100, justifyContent: 'center' }]}>
+            <Text style={{color: '#aaa'}}>Sense incidències registrades ✅</Text>
+          </View>
+        )}
+
+        {/* --- CAIXA DE RECOMANACIONS DINÀMICA --- */}
+        <View style={[styles.adviceBox, boxStyle]}>
+          <Text style={styles.adviceTitle}>
+            {currentAdvice.title}
+          </Text>
+          
+          <View style={styles.tipsContainer}>
+            {currentAdvice.tips.map((tip, index) => (
+              <Text key={index} style={styles.adviceText}>
+                {isHealthy && index > 1 && !tip.startsWith('•') ? '' : (isHealthy ? '' : '• ')} 
+                {tip}
+              </Text>
+            ))}
+          </View>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={handleOpenLink}>
+             <Text style={styles.actionButtonText}>Altres Recursos 🌐</Text>
+          </TouchableOpacity>
+
+        </View>
+
+        {/* DETALL PER ÀREES */}
+        {currentData.length > 0 && (
+            <>
+                <Text style={styles.subTitle}>Detall per Àrees</Text>
+                {currentData.map((item, index) => (
+                <View key={index} style={styles.rowItem}>
+                    <View style={styles.rowHeader}>
+                    <Text style={styles.rowLabel}>{item.name}</Text>
+                    <Text style={styles.rowValue}>{item.population}%</Text>
+                    </View>
+                    <View style={styles.progressBarBackground}>
+                    <View style={[styles.progressBarFill, { width: `${item.population}%`, backgroundColor: item.color }]} />
+                    </View>
+                </View>
+                ))}
+            </>
+        )}
+
+        <View style={{ height: 50 }} />
+      </View>
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    backgroundColor: '#1e1e1e',
+    flex: 1,
+    padding: 20,
+    minHeight: 900, 
+  },
   headerImage: {
     color: '#ffd33d',
     bottom: -50,
@@ -154,9 +247,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: 'bold', 
     color: '#fff',
-    fontFamily: 'System', 
   },
   sectionDescription: {
     color: '#ccc',
@@ -182,6 +274,8 @@ const styles = StyleSheet.create({
   filterText: {
     color: '#aaa',
     fontWeight: '600',
+    fontSize: 12, 
+    textAlign: 'center',
   },
   filterTextActive: {
     color: '#fff',
@@ -205,56 +299,66 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     borderLeftWidth: 5,
   },
-  adviceWarning: {
+  adviceAlert: {
     backgroundColor: '#3e2723', 
     borderLeftColor: '#ff5722', 
   },
-  adviceGood: {
+  adviceHealthy: {
     backgroundColor: '#1b5e20', 
     borderLeftColor: '#4caf50', 
   },
   adviceTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 15,
+  },
+  tipsContainer: {
+    marginBottom: 15, 
   },
   adviceText: {
     color: '#e0e0e0',
-    lineHeight: 22,
+    fontSize: 15,
+    lineHeight: 24,
+    marginBottom: 8,
   },
   actionButton: {
-    marginTop: 15,
-    backgroundColor: '#fff',
-    paddingVertical: 10,
+    marginTop: 5,
+    backgroundColor: 'rgba(255,255,255,0.15)', 
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
   actionButtonText: {
-    color: '#d32f2f',
+    color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   subTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 15,
+    marginTop: 10,
   },
   rowItem: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   rowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   rowLabel: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,      // Font Size 14
+    fontWeight: 'normal', // Normal (No negreta)
   },
   rowValue: {
     color: '#aaa',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   progressBarBackground: {

@@ -16,16 +16,19 @@ export default function ModalScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Formulario de Configuración</ThemedText>
+      <ThemedText type="title">Formulari inicial</ThemedText>
       
       <ThemedText style={styles.separator}>
-        ¡Al presionar el botón de abajo, se desbloquearán todas las secciones de la aplicación!
+        A continuació haurás de realitzar quatre activitats per evaular cadascuna de les àrees esmentades. Comencem!
       </ThemedText>
 
-      {/* 🔴 BOTÓN DE ACCIÓN */}
+      
+
+      {/* botó */}
       <Button 
-        title="Completar y Desbloquear" 
-        onPress={handleComplete} 
+        title="completar y desbloquejar" 
+        onPress={handleComplete}
+        color="#ffd33d" 
       />
     </ThemedView>
   );

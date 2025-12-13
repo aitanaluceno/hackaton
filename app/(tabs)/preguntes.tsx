@@ -1,3 +1,5 @@
+import PantallaBloqueig from '@/components/pantallabloqueig';
+import { useFormStatus } from '@/context/estatformularicontext';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -13,6 +15,13 @@ const QUESTIONS = [
 ];
 
 export default function AboutScreen() {
+  const { isFormCompleted } = useFormStatus();
+
+  if (!isFormCompleted) {
+    return <PantallaBloqueig />;
+  }
+
+  // 3. TODO EL CONTENIDO ORIGINAL DEL CUESTIONARIO CONTINÚA AQUÍ ABAJO (solo se ejecuta si isFormCompleted es true)
   const [answers, setAnswers] = useState({});
   const [diaryEntry, setDiaryEntry] = useState('');
 
@@ -55,7 +64,7 @@ export default function AboutScreen() {
         <TouchableOpacity
           style={[
             styles.optionButton, 
-            currentAnswer === 'si' && styles.optionButtonSelected // Usa estilo amarillo genérico
+            currentAnswer === 'si' && styles.optionButtonSelected 
           ]}
           onPress={() => onAnswer(questionData.id, 'si')}
         >
@@ -69,7 +78,7 @@ export default function AboutScreen() {
         <TouchableOpacity
           style={[
             styles.optionButton, 
-            currentAnswer === 'no' && styles.optionButtonSelected // Usa estilo amarillo genérico
+            currentAnswer === 'no' && styles.optionButtonSelected 
           ]}
           onPress={() => onAnswer(questionData.id, 'no')}
         >
@@ -121,6 +130,7 @@ export default function AboutScreen() {
   );
 }
 
+// Los estilos originales se mantienen sin cambios
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1e1e1e' },
   scrollContainer: { padding: 20 },
@@ -152,7 +162,6 @@ const styles = StyleSheet.create({
     borderColor: '#555',
   },
 
-  // --- CAMBIO: Un solo estilo seleccionado (Amarillo) ---
   optionButtonSelected: {
     backgroundColor: '#ffd33d', // Amarillo
     borderColor: '#ffd33d',
@@ -164,7 +173,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   
-  // Texto negro cuando se selecciona para contraste con amarillo
   optionTextSelected: {
     color: '#000', 
     fontWeight: '900', 

@@ -8,9 +8,9 @@ import { ThemedView } from './themed-view';
 const LockedScreen = () => {
   return (
     <ThemedView style={styles.container}>
-      <Ionicons name="lock-closed" size={60} color="grey" />
+      <Ionicons name="lock-closed" size={60} color="white" />
       <ThemedText type="subtitle" style={styles.text}>
-        Primero, por favor completa el formulario de inicio para acceder a esta sección.
+        Completa el formulari abans d'accedir a aquesta secció
       </ThemedText>
     </ThemedView>
   );
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   text: {
     marginTop: 20,
     textAlign: 'center',
-    color: 'grey',
+    color: 'white',
   },
 });
 
