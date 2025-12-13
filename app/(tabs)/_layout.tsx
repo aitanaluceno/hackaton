@@ -38,9 +38,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="preguntes_diaries"
+        name="preguntes"
         options={{
-          title: 'Preguntes diàries',
+          title: 'Preguntes',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="questionmark.circle.fill" color={color} />,
         }}
       />
