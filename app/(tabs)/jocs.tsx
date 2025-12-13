@@ -9,6 +9,7 @@ import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import LockedScreen from '@/components/pantallabloqueig';
 import { useFormStatus } from '@/context/estatformularicontext';
 
+// Componente auxiliar para texto en negrita
 const BoldText = ({ children }) => (
   <ThemedText type="defaultSemiBold" style={{ color: '#fff', fontWeight: 'bold' }}>
     {children}
@@ -17,7 +18,7 @@ const BoldText = ({ children }) => (
 
 const styles = StyleSheet.create({
   mainContainer: {
-    backgroundColor: '#444', 
+    backgroundColor: '#444', // Fondo principal
     flex: 1,
     padding: 20,
     minHeight: 900,
@@ -34,14 +35,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginBottom: 20,
   },
-
+  // Estilos para el bloque de juego
   gameContainer: {
     backgroundColor: 'transparent',
     padding: 15,
     borderRadius: 8,
     marginBottom: 25,
     borderWidth: 1,
-    borderColor: '#666', 
+    borderColor: '#666', // Borde sutil
   },
   gameTitle: {
     color: '#fff',
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   instructionsContainer: {
-    backgroundColor: '#353535', 
+    backgroundColor: '#353535', // Color de fondo para las instrucciones
     padding: 15,
     borderRadius: 6,
     marginBottom: 15,
@@ -60,12 +61,13 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   instructionText: {
-    color: '#ccc', 
+    color: '#ccc', // Gris claro para el cuerpo del texto
     lineHeight: 22,
   },
+  // Estilos del botón de acción (amarillo #ffd33d)
   actionButton: {
     marginTop: 10,
-    backgroundColor: '#ffd33d', 
+    backgroundColor: '#ffd33d', // Color amarillo solicitado
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     borderColor: '#ffd33d',
   },
   actionButtonText: {
-    color: '#000', 
+    color: '#000', // Texto negro en el botón amarillo
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -84,10 +86,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
+// *******************************************************************
 
 export default function TabTwoScreen() {
   const { isFormCompleted } = useFormStatus();
 
+  // Color de fondo para el ParallaxScrollView
   const HEADER_BACKGROUND_COLOR = '#444';
 
   if (!isFormCompleted) {
@@ -202,6 +206,7 @@ export default function TabTwoScreen() {
           </TouchableOpacity>
         </Link>
       </ThemedView>
+
 
       {/* Bloque de Juego 4: Velocidad de Procesamiento */}
       <ThemedView style={styles.gameContainer}>

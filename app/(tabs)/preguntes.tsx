@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const QUESTIONS = [
-  { id: 1, text: "He anat a un lloc de l’habitació i, quan hi he arribat, no he recordat què hi anava a fer", category: "Atenció" },
-  { id: 2, text: "He trigat més del normal a fer una activitat que abans feia més ràpid", category: "Velocitat de processament" },
-  { id: 3, text: "Volia dir una paraula i no m’ha sortit, o n’he dit una altra sense voler", category: "Fluència verbal" },
-  { id: 4, text: "Quan estava parlant amb algú, he perdut el fil de la conversa", category: "Atenció" },
-  { id: 5, text: "M’han preguntat per una cosa que m’havien dit fa poc i no me n’he recordat", category: "Memòria" },
-  { id: 6, text: "He tingut problemes per recordar informació que ja sabia prèviament", category: "Memòria" },
-  { id: 7, text: "He tingut problemes per prendre una decisió que abans no m’hauria costat", category: "Funcions executives" },
-  { id: 8, text: "He tingut dificultats per planificar el meu dia", category: "Funcions executives" },
+    { id: 'q1', text: 'He anat a un lloc de l’habitació i, quan hi he arribat, no he recordat què hi anava a fer', area: 'Atenció' },
+    { id: 'q2', text: 'He trigat més del normal a fer una activitat que abans feia més ràpid', area: 'Velocitat de processament' },
+    { id: 'q3', text: 'Volia dir una paraula i no m’ha sortit, o n’he dit una altra sense voler', area: 'Fluència verbal' },
+    { id: 'q4', text: 'Quan estava parlant amb algú, he perdut el fil de la conversa', area: 'Atenció' },
+    { id: 'q5', text: 'M’han preguntat per una cosa que m’havien dit fa poc i no me n’he recordat', area: 'Memòria' },
+    { id: 'q6', text: 'He tingut problemes per recordar informació que ja sabia prèviament', area: 'Memòria' },
+    { id: 'q7', text: 'He tingut problemes per prendre una decisió que abans no m’hauria costat', area: 'Funcions executives' },
+    { id: 'q8', text: 'He tingut dificultats per planificar el meu dia', area: 'Funcions executives' },
 ];
 
 export default function AboutScreen() {
