@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const QUESTIONS = [
   { id: 1, text: "He anat a un lloc de l’habitació i, quan hi he arribat, no he recordat què hi anava a fer", category: "Atenció" },

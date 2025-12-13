@@ -1,12 +1,14 @@
 import LockedScreen from '@/components/pantallabloqueig';
-import { useFormStatus } from '@/context/estatformularicontext';
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useFormStatus } from '@/context/estatformularicontext';
+import React, { useState } from 'react';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
+
+
 
 export default function TabTwoScreen() {
   // 1. Hooks de estado
