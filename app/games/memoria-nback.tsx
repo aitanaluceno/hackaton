@@ -44,7 +44,6 @@ export default function NBackGameScreen() {
           return;
         }
 
-        // Algoritmo 2-Back
         const shouldMatch = Math.random() < 0.3 && historyRef.current.length >= 2;
         
         let newIcon = '';
@@ -132,7 +131,6 @@ export default function NBackGameScreen() {
     );
   }
 
-  // 2. JUGANDO
   if (gameState === 'playing') {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -144,7 +142,7 @@ export default function NBackGameScreen() {
             <Text style={styles.infoText}>Encerts: {score}</Text>
           </View>
 
-          {/* ZONA DE JUEGO */}
+          {/* zona joc */}
           <View style={styles.gameArea}>
             <View style={[
               styles.iconCard, 
@@ -152,7 +150,6 @@ export default function NBackGameScreen() {
               feedback === 'wrong' && styles.borderRed
             ]}>
               {currentIcon ? (
-                // AQUI ESTA EL ARREGLO PRINCIPAL: Ionicons
                 <Ionicons name={currentIcon as any} size={100} color="#fff" />
               ) : (
                 <Text style={{color:'#666'}}>...</Text>
@@ -178,7 +175,6 @@ export default function NBackGameScreen() {
     );
   }
 
-  // 3. FINAL
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />

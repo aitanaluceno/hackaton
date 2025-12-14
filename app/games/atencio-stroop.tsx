@@ -3,7 +3,6 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
 
-// Configuració de colors i textos
 const COLORS = [
   { label: 'VERMELL', hex: '#ff4444' },
   { label: 'BLAU', hex: '#2196f3' },
@@ -16,18 +15,15 @@ const COLORS = [
 export default function StroopGameScreen() {
   const router = useRouter();
 
-  // Estats
   const [gameState, setGameState] = useState<'intro' | 'playing' | 'finished'>('intro');
-  const [timeLeft, setTimeLeft] = useState(45); // 45 segons per aquest joc
+  const [timeLeft, setTimeLeft] = useState(45);
   const [score, setScore] = useState(0);
   
-  // Estat de la ronda actual
   const [currentWord, setCurrentWord] = useState(COLORS[0]); 
   const [currentColor, setCurrentColor] = useState(COLORS[1]); 
   const [questionType, setQuestionType] = useState<'text' | 'color'>('text'); 
   const [options, setOptions] = useState<string[]>([]); 
 
-  // Temporitzador
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (gameState === 'playing' && timeLeft > 0) {
@@ -40,7 +36,6 @@ export default function StroopGameScreen() {
     return () => clearInterval(interval);
   }, [gameState, timeLeft]);
 
-  // Generar nova ronda
   const generateRound = () => {
     const randomWordIdx = Math.floor(Math.random() * COLORS.length);
     const randomColorIdx = Math.floor(Math.random() * COLORS.length);
@@ -118,14 +113,13 @@ export default function StroopGameScreen() {
     );
   }
 
-  // 2. JUGANDO
   if (gameState === 'playing') {
     return (
       <SafeAreaView style={styles.safeArea}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.containerPlaying}>
           
-          {/* Header Info */}
+          {/* Informació */}
           <View style={styles.headerBar}>
             <View>
               <Text style={styles.labelSmall}>Punts</Text>
@@ -240,8 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  
-  // Header Joc
   headerBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -269,8 +261,6 @@ const styles = StyleSheet.create({
   textRed: {
     color: '#ff4444',
   },
-
-  // Zona Pregunta
   questionContainer: {
     alignItems: 'center',
     gap: 10,
@@ -281,21 +271,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 1,
   },
-
-  // Paraula Central
   wordContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   stroopWord: {
-    fontSize: 55, // Molt gran
+    fontSize: 55, 
     fontWeight: '900',
     textTransform: 'uppercase',
-    // El color s'assigna dinàmicament
   },
 
-  // Botons resposta
   optionsContainer: {
     flexDirection: 'row',
     gap: 15,
@@ -316,7 +302,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // Resultat
   resultBox: {
     backgroundColor: '#333',
     borderRadius: 20,

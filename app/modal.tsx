@@ -39,28 +39,22 @@ export default function DiagnosticModalScreen() {
   const [atencioScore, setAtencioScore] = useState(0); 
   const [memoriaScore, setMemoriaScore] = useState(0); 
 
-  // --- ESTATS VELOCITAT ---
   const [vpNumbers, setVpNumbers] = useState<number[]>([]); 
   const [vpNextTarget, setVpNextTarget] = useState(1); 
   const [vpTimeElapsed, setVpTimeElapsed] = useState(0); 
 
-  // Refs timers
   const sequenceRef = useRef<NodeJS.Timeout | null>(null);
   const vpTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const simulationRef = useRef<NodeJS.Timeout | null>(null); // Ref per la simulació de veu
+  const simulationRef = useRef<NodeJS.Timeout | null>(null); 
 
-  // ---------------------------------------------------------
-  // 🎙️ SIMULACIÓ DE VEU (TRUC DEMO)
-  // ---------------------------------------------------------
   useEffect(() => {
     if (step === 'f_playing' && SIMULATE_VOICE) {
-      // Funció que afegeix una paraula cada X temps aleatori
       const scheduleNextWord = () => {
-        const randomDelay = Math.random() * 2000 + 1500; // Entre 1.5s i 3.5s
+        const randomDelay = Math.random() * 2000 + 1500; 
         simulationRef.current = setTimeout(() => {
           if (step === 'f_playing' && fluenciaTime > 0) {
-            addFluenciaWord(); // Suma punt
-            scheduleNextWord(); // Programa la següent
+            addFluenciaWord(); 
+            scheduleNextWord(); 
           }
         }, randomDelay);
       };
@@ -72,7 +66,6 @@ export default function DiagnosticModalScreen() {
   }, [step, fluenciaTime]);
 
 
-  // Timer Fluència
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (step === 'f_playing' && fluenciaTime > 0) {
@@ -83,7 +76,6 @@ export default function DiagnosticModalScreen() {
     return () => clearInterval(interval);
   }, [step, fluenciaTime]);
 
-  // Timer Velocitat
   useEffect(() => {
     if (step === 'vp_playing') {
       vpTimerRef.current = setInterval(() => {
@@ -95,7 +87,6 @@ export default function DiagnosticModalScreen() {
     };
   }, [step]);
 
-  // Reproductor Seqüències
   useEffect(() => {
     if (step === 'a_memorize' || step === 'di_memorize') {
       playSequence();
@@ -105,9 +96,6 @@ export default function DiagnosticModalScreen() {
     };
   }, [step, currentSequence]);
 
-  // ---------------------------------------------------------
-  // HELPERS
-  // ---------------------------------------------------------
   const generateSequence = (length: number) => {
     const newSeq = Array.from({ length }, () => Math.floor(Math.random() * 10));
     setCurrentSequence(newSeq);
@@ -136,9 +124,6 @@ export default function DiagnosticModalScreen() {
     }, 1000);
   };
 
-  // ---------------------------------------------------------
-  // 1. FLUÈNCIA VERBAL
-  // ---------------------------------------------------------
   const startFluencia = () => setStep('f_playing');
   const addFluenciaWord = () => { setFluenciaScore(s => s + 1); Vibration.vibrate(50); };
   const finishFluencia = () => { 
@@ -147,9 +132,6 @@ export default function DiagnosticModalScreen() {
     setStep('f_result'); 
   };
 
-  // ---------------------------------------------------------
-  // 2. ATENCIÓ (DIRECTES)
-  // ---------------------------------------------------------
   const startAtencio = () => {
     setDigitsLevel(DIRECT_MIN_DIGITS);
     setDigitsAttempt(1);
@@ -193,9 +175,6 @@ export default function DiagnosticModalScreen() {
     setStep('a_result');
   };
 
-  // ---------------------------------------------------------
-  // 3. MEMÒRIA TREBALL (INVERSOS)
-  // ---------------------------------------------------------
   const startInversos = () => {
     setDigitsLevel(INVERS_MIN_DIGITS); 
     setDigitsAttempt(1);
@@ -267,17 +246,10 @@ export default function DiagnosticModalScreen() {
     setStep('vp_result');
   };
 
-  // ---------------------------------------------------------
-  // GLOBAL
-  // ---------------------------------------------------------
   const handleUnlockApp = () => {
     completeForm();
     router.back();
   };
-
-  // =========================================================
-  // RENDERITZAT
-  // =========================================================
 
   if (step === 'welcome') {
     return (
@@ -304,7 +276,6 @@ export default function DiagnosticModalScreen() {
     );
   }
 
-  // --- 1. FLUÈNCIA ---
   if (step === 'f_intro') {
     return (
       <View style={styles.container}>
@@ -345,9 +316,9 @@ export default function DiagnosticModalScreen() {
             <Text style={[styles.timerValue, fluenciaTime <= 10 && styles.textRed]}>{fluenciaTime}</Text>
           </View>
           
-          {/* MICROFONO */}
+          {/* moicro */}
           <View style={styles.micContainer}>
-            {/* Si està simulant, fem que el micro parpellegi */}
+            {/* parpadeig si hi ha veu */}
             <View style={[styles.micCircle, SIMULATE_VOICE && {opacity: (fluenciaTime % 2 === 0 ? 1 : 0.7)}]}>
                 <Ionicons name="mic" size={60} color="#1e1e1e" />
             </View>
@@ -386,7 +357,6 @@ export default function DiagnosticModalScreen() {
     );
   }
 
-  // --- 2. ATENCIÓ ---
   if (step === 'a_intro') {
     return (
       <View style={styles.container}>
@@ -463,7 +433,6 @@ export default function DiagnosticModalScreen() {
     );
   }
 
-  // --- 3. MEMÒRIA TREBALL ---
   if (step === 'di_intro') {
     return (
       <View style={styles.container}>
@@ -524,7 +493,6 @@ export default function DiagnosticModalScreen() {
     );
   }
 
-  // --- 4. VELOCITAT (TMT-A) ---
   if (step === 'vp_intro') {
     return (
       <View style={styles.container}>

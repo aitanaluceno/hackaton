@@ -1,7 +1,6 @@
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import React, { useState } from 'react';
-import { Dimensions, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 
 import LockedScreen from '@/components/pantallabloqueig';
@@ -9,6 +8,25 @@ import { useFormStatus } from '@/context/estatformularicontext';
 
 const screenWidth = Dimensions.get('window').width;
 const RECURSOS_URL = "https://impactovitalcancer.com/recursos-y-experiencias/recursos-pacientes/gestion-emocional-y-psicologica/";
+
+const CATEGORY_MAP = {
+  'Fluència verbal': { color: '#4caf50', name: 'Fluència Verbal' },
+  'Atenció': { color: '#2196f3', name: 'Atenció' },
+  'Memòria': { color: '#ff9800', name: 'Memòria de Treball' }, 
+  'Velocitat de processament': { color: '#9c27b0', name: 'Velocitat Processament' },
+  'Funcions executives': { color: '#f44336', name: 'Funcions Executives' }, 
+};
+
+const QUESTIONS = [
+  { id: 1, category: "Atenció" },
+  { id: 2, category: "Velocitat de processament" },
+  { id: 3, category: "Fluència verbal" },
+  { id: 4, category: "Atenció" },
+  { id: 5, category: "Memòria" },
+  { id: 6, category: "Memòria" },
+  { id: 7, category: "Fluència verbal" }, 
+  { id: 8, category: "Velocitat de processament" },
+];
 
 const LEGEND_CONFIG = {
   legendFontColor: '#fff',
@@ -26,7 +44,7 @@ const RECOMANACIONS = {
       "Si tens una estona, llegeix un text curt i intenta comprendre’l detenidament."
     ]
   },
-  'Memòria de Treball': { 
+  'Memòria': { 
     title: "Estratègies i Recordatoris 🧠",
     tips: [
       "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
@@ -34,20 +52,28 @@ const RECOMANACIONS = {
       "Prova d'aprendre algunes paraules d'un nou idioma!"
     ]
   },
-  'Velocitat Processament': {
+  'Velocitat de processament': {
     title: "Agilitat Mental ⚡",
     tips: [
       "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
-      "Avui és el dia de les decisions ràpides: no pots tardar més de 15 segons en escollir la roba que et posaràs.",
+      "Avui és el dia de les decisions ràpides: no pots tardar més de 15 segons en escollir la roba que t'has de posar.",
       "Dia d'anar al supermercat! Prova a trobar el més ràpid possible on són les galetes Maria."
     ]
   },
-  'Fluència Verbal': {
+  'Fluència verbal': {
     title: "Paraules i Llenguatge 🗣️",
     tips: [
       "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
       "Avui durant 5 minuts has d'anar dient els objectes que veus al teu voltant.",
       "Pensa durant uns minuts quantes fruites i verdures hi ha de color vermell."
+    ]
+  },
+  'Funcions executives': {
+    title: "Planificació i Presa de Decisions 🤔",
+    tips: [
+      "Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona.",
+      "Planifica les teves tres tasques més importants del dia amb l'horari exacte.",
+      "Intenta fer un pressupost setmanal amb detall de totes les despeses."
     ]
   },
   'Sense Dèficit': {
@@ -62,49 +88,133 @@ const RECOMANACIONS = {
   }
 };
 
+const loadReports = async () => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const dailyReportKeys = keys.filter(key => key.startsWith('@daily_report_'));
+    const reportsJson = await AsyncStorage.multiGet(dailyReportKeys);
+    
+    const reports = reportsJson
+      .map(([key, value]) => {
+        try {
+          return JSON.parse(value);
+        } catch (e) {
+          console.error(`Error parsing report for key ${key}:`, e);
+          return null;
+        }
+      })
+      .filter(report => report !== null);
+
+    return reports;
+  } catch (e) {
+    console.error("Error cargando todos los reportes:", e);
+    return [];
+  }
+};
+
+const calculateDistribution = (reports, startDate = null) => {
+  const counts = {};
+  let totalSies = 0;
+
+  Object.keys(CATEGORY_MAP).forEach(key => counts[key] = 0);
+
+  const filterDate = startDate ? new Date(startDate) : null;
+
+  reports.forEach(report => {
+    const reportDate = new Date(report.date);
+
+    if (filterDate && reportDate < filterDate) {
+      return;
+    }
+
+    QUESTIONS.forEach(q => {
+      const answer = report.answers[q.id.toString()];
+      
+      if (answer === 'si') {
+        counts[q.category] = (counts[q.category] || 0) + 1;
+        totalSies++;
+      }
+    });
+  });
+
+  if (totalSies === 0) {
+    return [];
+  }
+
+  const pieChartData = Object.keys(counts)
+    .filter(category => counts[category] > 0)
+    .map(category => {
+      const percentage = Math.round((counts[category] / totalSies) * 100);
+      return {
+        name: CATEGORY_MAP[category].name,
+        population: percentage,
+        color: CATEGORY_MAP[category].color,
+        ...LEGEND_CONFIG
+      };
+    });
+
+  const currentTotal = pieChartData.reduce((sum, item) => sum + item.population, 0);
+  if (currentTotal !== 100 && pieChartData.length > 0) {
+      const largestSegment = pieChartData.reduce((prev, current) => (prev.population > current.population ? prev : current));
+      largestSegment.population += (100 - currentTotal);
+  }
+
+  return pieChartData;
+};
+
+
 export default function TabTwoScreen() {
   const [filter, setFilter] = useState('1mes'); 
-  
-  // 3. Obté l'estat del formulari
-  const { isFormCompleted } = useFormStatus();
+  const [allReports, setAllReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Condicional de bloqueig
+  const { isFormCompleted, reportUpdateTrigger } = useFormStatus();
+
+  const fetchReports = async () => {
+      setLoading(true);
+      const reports = await loadReports();
+      setAllReports(reports);
+      setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, [reportUpdateTrigger]);
+
   if (!isFormCompleted) {
     return <LockedScreen />;
   }
 
-  // 1. DADES ÚLTIM MES
-  // ... (la resta del teu codi continua igual)
-  const dadesUltimMes = [
-    { name: 'Fluència Verbal', population: 45, color: '#4caf50', ...LEGEND_CONFIG },
-    { name: 'Atenció', population: 20, color: '#2196f3', ...LEGEND_CONFIG },
-    { name: 'Memòria de Treball', population: 15, color: '#ff9800', ...LEGEND_CONFIG },
-    { name: 'Velocitat Processament', population: 20, color: '#9c27b0', ...LEGEND_CONFIG },
-  ];
-
-  // 2. DADES ÚLTIMS 3 MESOS
-  const dadesTrimestre = [
-    { name: 'Fluència Verbal', population: 20, color: '#4caf50', ...LEGEND_CONFIG },
-    { name: 'Atenció', population: 40, color: '#2196f3', ...LEGEND_CONFIG },
-    { name: 'Memòria de Treball', population: 20, color: '#ff9800', ...LEGEND_CONFIG },
-    { name: 'Velocitat Processament', population: 20, color: '#9c27b0', ...LEGEND_CONFIG },
-  ];
-
-  // 3. DADES SENSE DÈFICIT
-  const dadesHealthy = []; 
-
-  // SELECCIÓ DE DADES SEGONS FILTRE
   let currentData = [];
-  if (filter === '1mes') currentData = dadesUltimMes;
-  else if (filter === '3mesos') currentData = dadesTrimestre;
-  else currentData = dadesHealthy;
+  let startDate = null;
+  
+  if (loading) {
+    currentData = [];
+  } else if (allReports.length === 0) {
+    currentData = [];
+  } else {
+    const now = new Date();
+    
+    if (filter === '1mes') {
+      startDate = new Date(now.setDate(now.getDate() - 30));
+      currentData = calculateDistribution(allReports, startDate);
+    } else if (filter === '3mesos') {
+      const now3m = new Date();
+      startDate = new Date(now3m.setDate(now3m.getDate() - 90));
+      currentData = calculateDistribution(allReports, startDate);
+    }
+  }
 
-  // LÒGICA DE RECOMANACIÓ
+
   const getRecommendationContent = (data) => {
     if (!data || data.length === 0) return RECOMANACIONS['Sense Dèficit'];
+    
     const sortedData = [...data].sort((a, b) => b.population - a.population);
-    const topIssue = sortedData[0];
-    return RECOMANACIONS[topIssue.name] || RECOMANACIONS['Sense Dèficit'];
+    const topIssueName = sortedData[0].name;
+
+    const issueKey = Object.keys(CATEGORY_MAP).find(key => CATEGORY_MAP[key].name === topIssueName);
+
+    return RECOMANACIONS[issueKey] || RECOMANACIONS['Sense Dèficit'];
   };
 
   const currentAdvice = getRecommendationContent(currentData);
@@ -116,24 +226,13 @@ export default function TabTwoScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#1e1e1e' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#ffd33d"
-          name="chart.pie.fill"
-          style={styles.headerImage}
-        />
-      }>
-      
-      <View style={styles.mainContainer}>
-
+    <View style={styles.mainContainer}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Evolució Cognitiva</Text>
         </View>
 
-        {/* FILTRES TEMPORALS MODIFICATS */}
         <View style={styles.filterContainer}>
           <TouchableOpacity 
             style={[styles.filterBtn, filter === '1mes' && styles.filterBtnActive]}
@@ -147,41 +246,37 @@ export default function TabTwoScreen() {
           >
             <Text style={[styles.filterText, filter === '3mesos' && styles.filterTextActive]}>Últims 3 Mesos</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.filterBtn, filter === 'healthy' && styles.filterBtnActive]}
-            onPress={() => setFilter('healthy')}
-          >
-            <Text style={[styles.filterText, filter === 'healthy' && styles.filterTextActive]}>No Dèficit</Text>
-          </TouchableOpacity>
         </View>
 
         <Text style={styles.sectionDescription}>
           Distribució de les dificultats detectades. L'àrea més gran indica on hem d'incidir avui.
         </Text>
 
-        {/* GRÀFIC */}
-        {currentData.length > 0 ? (
-          <View style={styles.chartContainer}>
-            <PieChart
-              data={currentData}
-              width={screenWidth - 20}
-              height={220}
-              chartConfig={{
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              }}
-              accessor={"population"}
-              backgroundColor={"transparent"}
-              paddingLeft={"15"}
-              absolute 
-            />
-          </View>
-        ) : (
-          <View style={[styles.chartContainer, { height: 100, justifyContent: 'center' }]}>
-            <Text style={{color: '#aaa'}}>Sense incidències registrades ✅</Text>
-          </View>
-        )}
+        <View style={styles.chartContainer}>
+            {loading ? (
+                <ActivityIndicator size="large" color="#ffd33d" style={{ height: 220 }} />
+            ) : currentData.length > 0 ? (
+                <PieChart
+                data={currentData}
+                width={screenWidth - 60}
+                height={220}
+                chartConfig={{
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                }}
+                accessor={"population"}
+                backgroundColor={"transparent"}
+                paddingLeft={"15"}
+                absolute 
+                />
+            ) : (
+                <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{color: '#aaa', fontSize: 16}}>
+                        {allReports.length === 0 ? "Encara no hi ha dades registrades 📝" : "Sense incidències registrades ✅"}
+                    </Text>
+                </View>
+            )}
+        </View>
 
-        {/* --- CAIXA DE RECOMANACIONS DINÀMICA --- */}
         <View style={[styles.adviceBox, boxStyle]}>
           <Text style={styles.adviceTitle}>
             {currentAdvice.title}
@@ -202,7 +297,6 @@ export default function TabTwoScreen() {
 
         </View>
 
-        {/* DETALL PER ÀREES */}
         {currentData.length > 0 && (
             <>
                 <Text style={styles.subTitle}>Detall per Àrees</Text>
@@ -221,29 +315,28 @@ export default function TabTwoScreen() {
         )}
 
         <View style={{ height: 50 }} />
-      </View>
-    </ParallaxScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   mainContainer: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#1e1e1e', // Este es el fondo principal, lo dejo oscuro
     flex: 1,
+  },
+  contentContainer: {
     padding: 20,
     minHeight: 900, 
   },
-  headerImage: {
-    color: '#ffd33d',
-    bottom: -50,
-    left: -30,
-    position: 'absolute',
-    opacity: 0.3
-  },
+  // La imagen de cabecera (headerImage) y su estilo ya no se usan, pero dejo el style.mainContainer
+  // si el usuario quiere que el fondo sea '#444', tendría que cambiar mainContainer o contentContainer
+  
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    marginTop: 10, // Añadido para dar espacio superior ahora que no hay header
   },
   titleText: {
     fontSize: 28,
@@ -353,8 +446,8 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     color: '#fff',
-    fontSize: 14,      // Font Size 14
-    fontWeight: 'normal', // Normal (No negreta)
+    fontSize: 14,
+    fontWeight: 'normal',
   },
   rowValue: {
     color: '#aaa',

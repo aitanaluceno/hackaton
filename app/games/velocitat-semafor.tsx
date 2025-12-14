@@ -10,13 +10,11 @@ type LightColor = 'red' | 'green' | 'blue' | 'gray';
 export default function SemaforGameScreen() {
   const router = useRouter();
 
-  // Estats del joc
   const [gameState, setGameState] = useState<'intro' | 'playing' | 'finished'>('intro');
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(45);
   const [currentLight, setCurrentLight] = useState<LightColor>('gray');
   
-  // ESTAT PER AL PARPADEIG D'ERROR
   const [isErrorFlashing, setIsErrorFlashing] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null); 
@@ -142,10 +140,8 @@ export default function SemaforGameScreen() {
     );
   }
 
-  // 2. JUGANDO
   if (gameState === 'playing') {
     return (
-      // AQUI ESTÁ EL CAMBIO CLAVE: El estilo del contenedor cambia si hay error
       <SafeAreaView style={[styles.safeArea, isErrorFlashing && styles.safeAreaErrorFlash]}>
         <Stack.Screen options={{ headerShown: false }} />
         
@@ -166,7 +162,7 @@ export default function SemaforGameScreen() {
                     currentLight === 'gray' && styles.lightOff,
                 ]} />
             </View>
-            {/* Texto de error opcional si el flash no es suficiente */}
+            {/* text error */}
             {isErrorFlashing && <Text style={styles.errorTextLabel}>ERROR!</Text>}
           </View>
 
@@ -228,11 +224,10 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e1e1e', // Fondo normal oscuro
+    backgroundColor: '#1e1e1e', 
   },
-  // NUEVO ESTILO: Fondo rojo para el error
   safeAreaErrorFlash: {
-    backgroundColor: '#500', // Rojo oscuro intenso
+    backgroundColor: '#500', 
   },
   containerPlaying: {
     flex: 1,

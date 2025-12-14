@@ -1,7 +1,24 @@
 import PantallaBloqueig from '@/components/pantallabloqueig';
 import { useFormStatus } from '@/context/estatformularicontext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+const storeData = async (value) => {
+  try {
+    const jsonValue = JSON.stringify(value);
+    
+    const key = `@daily_report_${value.date.split('T')[0]}`;
+    
+    await AsyncStorage.setItem(key, jsonValue);
+    console.log(`Datos guardados localmente con la clave: ${key}`);
+    return true;
+  } catch (e) {
+    console.error('Error al guardar datos en AsyncStorage:', e);
+    Alert.alert("Error de guardado", "No se pudieron guardar los datos localmente.");
+    return false;
+  }
+};
 
 const QUESTIONS = [
   { id: 1, text: "He anat a un lloc de l’habitació i, quan hi he arribat, no he recordat què hi anava a fer", category: "Atenció" },
@@ -10,18 +27,17 @@ const QUESTIONS = [
   { id: 4, text: "Quan estava parlant amb algú, he perdut el fil de la conversa", category: "Atenció" },
   { id: 5, text: "M’han preguntat per una cosa que m’havien dit fa poc i no me n’he recordat", category: "Memòria" },
   { id: 6, text: "He tingut problemes per recordar informació que ja sabia prèviament", category: "Memòria" },
-  { id: 7, text: "He tingut problemes per prendre una decisió que abans no m’hauria costat", category: "Funcions executives" },
-  { id: 8, text: "He tingut dificultats per planificar el meu dia", category: "Funcions executives" },
+  { id: 7, text: "Sovint tinc la sensació de ternia la paraula 'a la punta de la llengua'", category: "Fluència Verbal" },
+  { id: 8, text: "Em costa seguir el ritme d'una conversa o d'una pel·lícula quan parlen ràpid", category: "Velocitat de processament" },
 ];
 
 export default function AboutScreen() {
-  const { isFormCompleted } = useFormStatus();
+  const { isFormCompleted, triggerReportUpdate } = useFormStatus();
 
   if (!isFormCompleted) {
     return <PantallaBloqueig />;
   }
 
-  // 3. TODO EL CONTENIDO ORIGINAL DEL CUESTIONARIO CONTINÚA AQUÍ ABAJO (solo se ejecuta si isFormCompleted es true)
   const [answers, setAnswers] = useState({});
   const [diaryEntry, setDiaryEntry] = useState('');
 
@@ -32,7 +48,7 @@ export default function AboutScreen() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const totalAnswered = Object.keys(answers).length;
     if (totalAnswered < QUESTIONS.length) {
       Alert.alert("Falten respostes", "Si us plau, respon totes les preguntes.");
@@ -49,18 +65,31 @@ export default function AboutScreen() {
       ? "Tot correcte! Recomanació: Manteniment." 
       : `Detectat: ${categoriesArray.join(', ')}.`;
 
-    const dailyReport = { date: new Date(), answers, journal: diaryEntry };
-    console.log("Report:", dailyReport);
+    const dailyReport = { 
+        date: new Date().toISOString(), 
+        answers, 
+        journal: diaryEntry 
+    };
+    
+    console.log("Report a guardar:", dailyReport);
 
-    Alert.alert("Registre Desat", recomendacion);
+    const success = await storeData(dailyReport);
+
+    if (success) {
+        Alert.alert("Registre Desat", recomendacion);
+        
+        triggerReportUpdate();
+        
+        setAnswers({});
+        setDiaryEntry('');
+    }
   };
-
+  
   const YesNoRow = ({ questionData, currentAnswer, onAnswer }) => (
     <View style={styles.questionContainer}>
       <Text style={styles.questionText}>{questionData.id}. {questionData.text}</Text>
       
       <View style={styles.optionsContainer}>
-        {/* Botón SÍ */}
         <TouchableOpacity
           style={[
             styles.optionButton, 
@@ -74,7 +103,6 @@ export default function AboutScreen() {
           ]}>Sí</Text>
         </TouchableOpacity>
 
-        {/* Botón NO */}
         <TouchableOpacity
           style={[
             styles.optionButton, 
@@ -130,7 +158,6 @@ export default function AboutScreen() {
   );
 }
 
-// Los estilos originales se mantienen sin cambios
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1e1e1e' },
   scrollContainer: { padding: 20 },
@@ -163,7 +190,7 @@ const styles = StyleSheet.create({
   },
 
   optionButtonSelected: {
-    backgroundColor: '#ffd33d', // Amarillo
+    backgroundColor: '#ffd33d',
     borderColor: '#ffd33d',
   },
 

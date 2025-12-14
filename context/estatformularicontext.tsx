@@ -3,6 +3,8 @@ import React, { createContext, ReactNode, useContext, useState } from 'react';
 interface FormStatusContextType {
   isFormCompleted: boolean;
   completeForm: () => void;
+  reportUpdateTrigger: number;
+  triggerReportUpdate: () => void;
 }
 
 const FormStatusContext = createContext<FormStatusContextType | undefined>(undefined);
@@ -20,17 +22,22 @@ interface FormStatusProviderProps {
 }
 
 export const FormStatusProvider: React.FC<FormStatusProviderProps> = ({ children }) => {
-  // estat inicial = false;
   const [isFormCompleted, setIsFormCompleted] = useState(false);
+  const [reportUpdateTrigger, setReportUpdateTrigger] = useState(0);
 
-  // desbloquejar aplicació
   const completeForm = () => {
     setIsFormCompleted(true);
+  };
+  
+  const triggerReportUpdate = () => {
+    setReportUpdateTrigger(prev => prev + 1);
   };
 
   const value = {
     isFormCompleted,
     completeForm,
+    reportUpdateTrigger,
+    triggerReportUpdate,
   };
 
   return (

@@ -14,18 +14,16 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: TAB_BAR_BACKGROUND_COLOR, // <--- CAMBIO AQUÍ
-          borderTopColor: TAB_BAR_BACKGROUND_COLOR, // Usa el mismo color para ocultar la línea de borde
+          backgroundColor: TAB_BAR_BACKGROUND_COLOR, 
+          borderTopColor: TAB_BAR_BACKGROUND_COLOR, 
         },
-        // Los colores de icono/texto se mantienen según tu configuración en theme.ts (tabIconSelected y tabIconDefault)
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tabIconSelected, 
         tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault, 
         
-        // Ajustamos el color del encabezado de cada pantalla para que coincida
         headerStyle: {
-          backgroundColor: TAB_BAR_BACKGROUND_COLOR, // <--- CAMBIO AQUÍ
+          backgroundColor: TAB_BAR_BACKGROUND_COLOR, 
         },
-        headerTintColor: Colors[colorScheme ?? 'light'].text, // Título del encabezado (blanco)
+        headerTintColor: Colors[colorScheme ?? 'light'].text, 
       }}>
       <Tabs.Screen
         name="index"

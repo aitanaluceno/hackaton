@@ -83,7 +83,7 @@ export default function FluenciaVerbalScreen() {
         <View style={styles.containerPlaying}>
           <Stack.Screen options={{ headerShown: false }} /> 
           
-          {/* Temporizador: Ahora es parte del flujo, no absoluto */}
+          {/* Temporizador */}
           <View style={styles.timerContainer}>
             <Text style={styles.timerLabel}>Temps:</Text>
             <Text style={[styles.timerValue, timeLeft <= 5 && styles.timerRed]}>{timeLeft}s</Text>
@@ -251,8 +251,6 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
   },
-
-  // Botón Grande
   tapButton: {
     backgroundColor: '#4caf50', 
     width: 220, 
